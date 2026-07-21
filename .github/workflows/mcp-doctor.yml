@@ -1,0 +1,20 @@
+name: MCP Doctor
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  mcp-doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: lghiur/openapi-to-mcp-doctor@master
+        with:
+          spec: swagger.yml
+          behavior: fix-pr
+          llm-base-url: ${{ secrets.LLM_BASE_URL }}
+          llm-api-token: ${{ secrets.LLM_API_TOKEN }}
