@@ -28,7 +28,9 @@ package gateway
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -3779,4 +3781,19 @@ func validateAPIDef(apiDef *apidef.APIDefinition) *apiStatusMessage {
 	}
 
 	return nil
+}
+
+// configChecksumHandler returns the SHA256 checksum of the currently loaded
+// gateway configuration. It can be used to detect configuration drift between
+// gateway nodes without exposing the configuration contents themselves.
+func (gw *Gateway) configChecksumHandler(w http.ResponseWriter, r *http.Request) {
+	confBytes, err := json.Marshal(gw.GetConfig())
+	if err != nil {
+		doJSONWrite(w, http.StatusInternalServerError, apiError("Failed to marshal gateway configuration"))
+		return
+	}
+
+	checksum := sha256.Sum256(confBytes)
+
+	doJSONWrite(w, http.StatusOK, apiOk(hex.EncodeToString(checksum[:])))
 }
