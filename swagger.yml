@@ -2189,6 +2189,34 @@ paths:
       summary: Test a Tyk Classic or Tyk OAS API definition.
       tags:
       - Debug
+  /tyk/debug/flush-analytics:
+    post:
+      description: Force the gateway to flush any buffered analytics records to the
+        configured analytics store immediately, rather than waiting for the next
+        purge interval.
+      operationId: flushAnalytics
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                message: Analytics buffer flushed
+                status: ok
+              schema:
+                $ref: '#/components/schemas/ApiStatusMessage'
+          description: Analytics buffer flushed.
+        "403":
+          content:
+            application/json:
+              example:
+                message: Attempted administrative access with invalid or missing key!
+                status: error
+              schema:
+                $ref: '#/components/schemas/ApiStatusMessage'
+          description: Forbidden
+      summary: Flush buffered analytics records.
+      tags:
+      - Debug
   /tyk/keys:
     get:
       description: List all the API keys.
@@ -4651,6 +4679,54 @@ paths:
       summary: Update a policy.
       tags:
       - Policies
+  /tyk/quotas/{keyID}/history:
+    get:
+      description: Retrieve the quota consumption history for the given API key,
+        including the quota limit, the remaining allowance and the time at which
+        each quota period was renewed.
+      operationId: getQuotaHistory
+      parameters:
+      - description: The API key ID.
+        in: path
+        name: keyID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  properties:
+                    quota_max:
+                      description: Maximum number of requests allowed in the quota
+                        period.
+                      format: int64
+                      type: integer
+                    quota_remaining:
+                      description: Number of requests remaining in the quota period.
+                      format: int64
+                      type: integer
+                    renewed_at:
+                      description: Time at which the quota period started.
+                      format: date-time
+                      type: string
+                  type: object
+                type: array
+          description: Quota history for the key.
+        "404":
+          content:
+            application/json:
+              example:
+                message: There is no such key found
+                status: error
+              schema:
+                $ref: '#/components/schemas/ApiStatusMessage'
+          description: Key not found.
+      summary: Retrieve quota history for a key.
+      tags:
+      - Keys
   /tyk/reload:
     get:
       description: Tyk is capable of reloading configurations without having to stop
