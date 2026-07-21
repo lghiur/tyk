@@ -2189,6 +2189,11 @@ paths:
       summary: Test a Tyk Classic or Tyk OAS API definition.
       tags:
       - Debug
+  /tyk/debug/goroutine-count:
+    get:
+      responses:
+        "200":
+          description: OK
   /tyk/keys:
     get:
       description: List all the API keys.

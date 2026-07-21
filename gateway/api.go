@@ -39,6 +39,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -3779,4 +3780,13 @@ func validateAPIDef(apiDef *apidef.APIDefinition) *apiStatusMessage {
 	}
 
 	return nil
+}
+
+// goroutineCountHandler returns the number of goroutines currently running
+// inside the gateway process. It is useful for spotting goroutine leaks on a
+// live node.
+func (gw *Gateway) goroutineCountHandler(w http.ResponseWriter, r *http.Request) {
+	doJSONWrite(w, http.StatusOK, struct {
+		Count int `json:"count"`
+	}{Count: runtime.NumGoroutine()})
 }
